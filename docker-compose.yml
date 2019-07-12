@@ -1,0 +1,26 @@
+version: "3.4"
+services:
+  api:
+    build:
+      context: .
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./:/usr/src/app
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8000:8000
+
+  rabbitmq:
+    image: rabbitmq:3.7.16-management
+    ports:
+      - 15672:15672
+
+  worker:
+    build:
+      context: .
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./:/usr/src/app
+    command: celery -A djanog_celery_setup worker -l debug
